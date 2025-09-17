@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/Common/Button'
+import { useAuthStore, selectIsLogin } from '@/store/AuthStore'
 
 interface Props {
   userId: string
@@ -13,6 +14,7 @@ interface Props {
 
 export function ChatViewButton({ userId, onClick, postId, variant = 'post' }: Props) {
   const [isMobile, setIsMobile] = useState(false)
+  const isLogin = useAuthStore(selectIsLogin)
 
   useEffect(() => {
     const mql = window.matchMedia('(max-width: 640px)')
@@ -35,14 +37,15 @@ export function ChatViewButton({ userId, onClick, postId, variant = 'post' }: Pr
   }, [])
 
   if (isMobile) {
+    const href = `/chatbot/${userId}${postId != null ? `?postId=${postId}` : ''}`
     return (
-      <Link
-        href={`/chatbot/${userId}${postId != null ? `?postId=${postId}` : ''}`}
-      >
-        <Button>
-        챗봇 이동
-        </Button>
-      </Link>
+      isLogin ? (
+        <Link href={href}>
+          <Button>챗봇 이동</Button>
+        </Link>
+      ) : (
+        <Button onClick={onClick}>챗봇 이동</Button>
+      )
     )
   }
 
