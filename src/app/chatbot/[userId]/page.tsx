@@ -88,8 +88,24 @@ export default function ChatPage() {
 
     const initialInspector: InspectorData =
       askVersion === 'v1'
-        ? { version: 'v1', open: false, v1Context: [] }
-        : { version: 'v2', open: false, v2Plan: null, v2Rewrites: [], v2Keywords: [], v2HybridResult: [], v2SearchResult: [], v2Context: [] }
+        ? { version: 'v1', open: false, v1Context: [], v1ContextReceived: false, pending: true }
+        : {
+            version: 'v2',
+            open: false,
+            v2Plan: null,
+            v2PlanReceived: false,
+            v2Rewrites: [],
+            v2RewritesReceived: false,
+            v2Keywords: [],
+            v2KeywordsReceived: false,
+            v2HybridResult: [],
+            v2HybridResultReceived: false,
+            v2SearchResult: [],
+            v2SearchResultReceived: false,
+            v2Context: [],
+            v2ContextReceived: false,
+            pending: true,
+          }
 
     setMessages(prev => [
       ...prev,
@@ -108,7 +124,11 @@ export default function ChatPage() {
             setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg && msg.inspector) msg.inspector.v1Context = items
+              if (msg && msg.inspector) {
+                msg.inspector.v1Context = items
+                msg.inspector.v1ContextReceived = true
+                msg.inspector.pending = false
+              }
               return next
             })
           },
@@ -132,37 +152,61 @@ export default function ChatPage() {
             onSearchPlan: p => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Plan = p
+              if (msg?.inspector) {
+                msg.inspector.v2Plan = p
+                msg.inspector.v2PlanReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onRewrites: r => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Rewrites = r
+              if (msg?.inspector) {
+                msg.inspector.v2Rewrites = r
+                msg.inspector.v2RewritesReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onKeywords: k => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Keywords = k
+              if (msg?.inspector) {
+                msg.inspector.v2Keywords = k
+                msg.inspector.v2KeywordsReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onHybridResult: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2HybridResult = items
+              if (msg?.inspector) {
+                msg.inspector.v2HybridResult = items
+                msg.inspector.v2HybridResultReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onSearchResult: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2SearchResult = items
+              if (msg?.inspector) {
+                msg.inspector.v2SearchResult = items
+                msg.inspector.v2SearchResultReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onContext: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Context = items
+              if (msg?.inspector) {
+                msg.inspector.v2Context = items
+                msg.inspector.v2ContextReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onAnswerChunk: chunk => {
@@ -204,7 +248,7 @@ export default function ChatPage() {
 
   return (
     <div className='bg-[rgb(244,246,248)] w-full h-full'>
-      <div className="px-6 md:px-16 w-full flex flex-col items-center">
+      <div className="px-6 md:px-16 w-full flex flex-col items-center overflow-hidden max-h-full">
         <div className='flex gap-2 w-full justify-between sticky top-0 z-10 py-8 bg-[rgb(244,246,248)] flex-wrap max-w-5xl'>
           <ProfileHeader profile={profile} />
           {postId != null && (
@@ -216,7 +260,7 @@ export default function ChatPage() {
           )}
         </div>
       
-        <div className="flex flex-col items-center justify-center w-full max-w-5xl">
+        <div className="flex flex-col items-center justify-center w-full max-w-5xl overflow-hidden max-h-full">
           {postId == null && (
             <CategorySelector
               userId={userId!}
@@ -252,7 +296,7 @@ export default function ChatPage() {
               )}
             </div>
           )}
-          <div ref={chatEndRef} />
+          
 
           {modalPostId && (
             <DraggableModal path= {`/post/${modalPostId}`} onClose={() => setModalPostId(null)}>

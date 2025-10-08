@@ -86,8 +86,24 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
 
     const initialInspector: InspectorData =
       askVersion === 'v1'
-        ? { version: 'v1', open: false, v1Context: [] }
-        : { version: 'v2', open: false, v2Plan: null, v2Rewrites: [], v2Keywords: [], v2HybridResult: [], v2SearchResult: [], v2Context: [] }
+        ? { version: 'v1', open: false, v1Context: [], v1ContextReceived: false, pending: true }
+        : {
+            version: 'v2',
+            open: false,
+            v2Plan: null,
+            v2PlanReceived: false,
+            v2Rewrites: [],
+            v2RewritesReceived: false,
+            v2Keywords: [],
+            v2KeywordsReceived: false,
+            v2HybridResult: [],
+            v2HybridResultReceived: false,
+            v2SearchResult: [],
+            v2SearchResultReceived: false,
+            v2Context: [],
+            v2ContextReceived: false,
+            pending: true,
+          }
 
     setMessages(prev => [...prev, userMsg, { id: botId, role: 'bot', content: '', inspector: initialInspector }])
 
@@ -104,6 +120,8 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
               const msg = next.find(m => m.id === botId)
               if (msg && msg.inspector) {
                 msg.inspector.v1Context = items
+                msg.inspector.v1ContextReceived = true
+                msg.inspector.pending = false
               }
               return next
             })
@@ -128,38 +146,62 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
             onSearchPlan: p => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Plan = p
+              if (msg?.inspector) {
+                msg.inspector.v2Plan = p
+                msg.inspector.v2PlanReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onRewrites: r => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Rewrites = r
+              if (msg?.inspector) {
+                msg.inspector.v2Rewrites = r
+                msg.inspector.v2RewritesReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onKeywords: k => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Keywords = k
+              if (msg?.inspector) {
+                msg.inspector.v2Keywords = k
+                msg.inspector.v2KeywordsReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onHybridResult: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2HybridResult = items
+              if (msg?.inspector) {
+                msg.inspector.v2HybridResult = items
+                msg.inspector.v2HybridResultReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onSearchResult: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2SearchResult = items
+              if (msg?.inspector) {
+                msg.inspector.v2SearchResult = items
+                msg.inspector.v2SearchResultReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onExistInPostStatus: exists => setExistInPost(exists),
             onContext: items => setMessages(prev => {
               const next = [...prev]
               const msg = next.find(m => m.id === botId)
-              if (msg?.inspector) msg.inspector.v2Context = items
+              if (msg?.inspector) {
+                msg.inspector.v2Context = items
+                msg.inspector.v2ContextReceived = true
+                msg.inspector.pending = false
+              }
               return next
             }),
             onAnswerChunk: chunk => {
@@ -225,7 +267,7 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto mt-4">
+      <main className="flex-1 mt-4">
         <ChatMessages
           messages={messages}
           chatEndRef={chatEndRef}
@@ -233,7 +275,6 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
             setMessages(prev => prev.map(m => (m.id === id && m.inspector) ? { ...m, inspector: { ...m.inspector, open: !m.inspector.open } } : m))
           }}
         />
-        <div ref={chatEndRef} />
       </main>
 
       <footer className="flex-none mt-4">
@@ -278,4 +319,3 @@ export function ChatWindow({ userId, postId, postTitle }: Props) {
     </div>
   )
 }
-
