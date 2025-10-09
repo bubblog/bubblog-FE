@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
 import { Button } from '@/components/Common/Button'
 import { useAuthStore, selectIsLogin } from '@/store/AuthStore'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface Props {
   userId: string
@@ -13,28 +13,9 @@ interface Props {
 }
 
 export function ChatViewButton({ userId, onClick, postId, variant = 'post' }: Props) {
-  const [isMobile, setIsMobile] = useState(false)
+  const isMobile = useIsMobile()
   const isLogin = useAuthStore(selectIsLogin)
 
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 640px)')
-    const update = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    setIsMobile(mql.matches)
-
-    if (mql.addEventListener) {
-      mql.addEventListener('change', update)
-    } else {
-      mql.addListener(update)
-    }
-
-    return () => {
-      if (mql.removeEventListener) {
-        mql.removeEventListener('change', update)
-      } else {
-        mql.removeListener(update)
-      }
-    }
-  }, [])
 
   if (isMobile) {
     const href = `/chatbot/${userId}${postId != null ? `?postId=${postId}` : ''}`
